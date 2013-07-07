@@ -4,8 +4,10 @@ var buf = new Buffer('Hello world from index.html');
 
 var app = express.createServer(express.logger());
 
+buf = fs.readFileSync('index.html');
+
 app.get('/', function(request, response) {
-  response.send(buf.toString('utf-8', 0, fs.readFileSync('index.html')));
+  response.send(buf.toString('utf-8'));
 });
 
 var port = process.env.PORT || 5000;
