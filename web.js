@@ -1,6 +1,6 @@
 var express = require('express');
 var fs = require('fs');
-var buf = new Buffer('Hello world from index.html');
+var buf = new Buffer('Hello world from index.htm2');
 
 var app = express.createServer(express.logger());
 
