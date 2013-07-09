@@ -47,6 +47,21 @@ var loadChecks = function(checksfile) {
 };
 
 var checkHtmlFile = function(htmlfile, checksfile) {
+    
+    if ( ~htmlfile.indexOf("://")) {
+//    fs.openSync("tmp123.html", "w+");
+//    var data = "1";
+   // var tmp123 = fs.appendFileSync("tmp123.html", data, "utf8");
+//    rest.get(htmlfile, {decoding: "utf8"}).on('success', function(data) {
+//         fs.appendFileSync("tmp123.html", data, "utf8"); 
+     //    return data;   
+//    });
+   
+//    console.log(fs.readFileSync("tmp123.html", "utf8"));
+    htmlfile = "tmp123.html";
+//    console.log(htmlfile + "1");
+    } 
+//    console.log(htmlfile);
     $ = cheerioHtmlFile(htmlfile);
     var checks = loadChecks(checksfile).sort();
     var out = {};
@@ -64,13 +79,9 @@ var clone = function(fn) {
 };
 
 var assertUrlExists = function(initurl) {
-    var url_file = rest.get(initurl.toString()).on('complete', function(data) { 
-       
-       fs.appendFile("tmp123.html", data, "utf8");     
-       return data; 
-    });
-    console.log(url_file);
-    url_file = "tmp123.html";
+    var url_file = initurl.toString();
+
+//    console.log(url_file);
     return url_file;
 };
 
@@ -79,15 +90,32 @@ if(require.main == module) {
     program
         .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
         .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
-        .option('-u, --url <html_url>', 'Path to any url', clone(assertUrlExists), HTMLFILE_DEFAULT)
+        .option('-u, --url <html_url>', 'Path to any url', clone(assertUrlExists))
         .parse(process.argv);
+    if (program.url) {
+        rest.get(program.url, {decoding: "utf8"}).on('success', function(data) {
+               fs.openSync("tmp123.html", "w+");  
+               fs.appendFile("tmp123.html", data, "utf8");
+         //    return data;
+         //    console.log(data);
+               process.on('exit', function(){
+                    var checkJsonUrl = checkHtmlFile(program.url, program.checks);
+                    var outJsonUrl = JSON.stringify(checkJsonUrl, null, 4);
+                    fs.appendFileSync("checks_output.json", outJsonUrl, "utf8");
+                    console.log(outJsonUrl);                                                                                                                });
+        });
+        
+       // var checkJsonUrl = checkHtmlFile(program.url, program.checks);
+       // var outJsonUrl = JSON.stringify(checkJsonUrl, null, 4);
+
+       // console.log(outJsonUrl);
+    } else {
     var checkJson = checkHtmlFile(program.file, program.checks);
-    var checkJsonUrl = checkHtmlFile(program.url, program.checks);
     var outJson = JSON.stringify(checkJson, null, 4);
-    var outJsonUrl = JSON.stringify(checkJsonUrl, null, 4);
-    
-    console.log(outJsonUrl);
-    
+    fs.appendFileSync("checks_output.json", outJsonUrl, "utf8");
+    console.log(outJson);
+    }
+
 } else {
     exports.checkHtmlFile = checkHtmlFile;
 }
